@@ -36,6 +36,10 @@ class Qr_Module extends Module{
     }
 
     public function uninstall(){
-        return parent::uninstall();
+        if( !parent::uninstall() || !Configuration::deleteByName('QR_MODULE_NAME') ){
+            return false;
+        }else{
+            return true;
+        }
     }
 }
