@@ -3,11 +3,11 @@
     <name>qr_module</name>
     <displayName><![CDATA[QR code module]]></displayName>
     <version><![CDATA[0.1]]></version>
-    <description><![CDATA[QR code generation for your products module]]></description>
+    <description><![CDATA[Dislpay a QR Code image for your products]]></description>
     <author><![CDATA[GRP_3]]></author>
     <tab><![CDATA[front_office_features]]></tab>
 	<confirmUninstall><![CDATA[Voulez-vous vraiment désinstaller ce module ?]]></confirmUninstall>
-    <is_configurable>0</is_configurable>
+    <is_configurable>1</is_configurable>
     <need_instance>0</need_instance>
 	<limited_countries></limited_countries>
 </module>
