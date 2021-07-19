@@ -67,16 +67,17 @@ class Qr_Module extends Module{
 		if (Tools::isSubmit('btnSubmit')) {
 			//récupere la valeur du champ txt
 			$pageName = strval(Tools::getValue('QR_MODULE_NAME'));
-
+            $color = strval(Tools::getValue('QR_MODULE_COLOR'));
 			//Vérifie qu'il n'est pas vide
 			if (!$pageName||empty($pageName))
 			{
 				//Si oui, affiche une erreur
-				$output .= $this->displayError($this->l('Valeur invalide'));
+				$output = $this->displayError($this->l('Valeur invalide'));
 			} else {
 				Configuration::updateValue('QR_MODULE_NAME', $pageName);
+				Configuration::updateValue('QR_MODULE_COLOR', $color);
 				//notif succes
-				$output .= $this->displayConfirmation($this->l('Valeur mise à jour'));
+				$output = $this->displayConfirmation($this->l('Valeurs mise à jour'));
 			}
 		}
 
@@ -86,6 +87,8 @@ class Qr_Module extends Module{
     public function displayForm() 
 	{
 		//Affichage du formulaire
+        $image = ('https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=test&color=' . $this->hexToRgb(strval(Configuration::get('QR_MODULE_COLOR'))));
+        $image_url = ImageManager::thumbnail($image,'test.png', 350, 'png', true, true);
 
 		$form = array(
 			'form' => array(
@@ -98,13 +101,24 @@ class Qr_Module extends Module{
 						'label' => $this->l('Configuration value'),
 						'name' => 'QR_MODULE_NAME',
 						'size' => 20,
-						'required' => true
+						'required' => true,
                     ),
                     array(
                         'type' => 'color',
                         'label' => $this->l('Color'),
-                        'name' => 'TK_THEME_BG_COLOR'
-                        )						
+                        'name' => 'QR_MODULE_COLOR'
+                    ),
+                    array(
+                        'type' => 'file',
+                        'label' => $this->l('Previsualization'),
+                        'disabled' => true,
+                        'name' => 'image_url_maker',
+                        'image' => $image_url ,
+                        'size' => 350,
+                        'display_image' => true,
+                        'col' => 6,
+                        'hint' => $this->l('Upload a maker image from your computer.')
+                    ),
                     
 				),
 				'submit' => array(
@@ -116,11 +130,13 @@ class Qr_Module extends Module{
 
 		$helper = new HelperForm();
 
+        $helper->fields_value['QR_MODULE_NAME'] = strval(Configuration::get('QR_MODULE_NAME'));
+        $helper->fields_value['QR_MODULE_COLOR'] = strval(Configuration::get('QR_MODULE_COLOR'));
 		$helper->module = $this;
 		$helper->name_controller = $this->name;
 		$helper->token = Tools::getAdminTokenLite('AdminModules');
 		$helper->currentIndex = AdminController::$currentIndex.'&configure='.$this->name;
-
+        echo "<img src='$image'>";
 		//Langue
 		//$defaultLang = (int)Configuration::get('PS_LANG_DEFAULT');
 		//$helper->default_form_language = $defaultLang;
@@ -130,6 +146,18 @@ class Qr_Module extends Module{
 
 		return $helper->generateForm(array($form));
 	}
+
+    private function hexToRgb($hex, $alpha = false) {
+        $hex      = str_replace('#', '', $hex);
+        $length   = strlen($hex);
+        $rgb['r'] = hexdec($length == 6 ? substr($hex, 0, 2) : ($length == 3 ? str_repeat(substr($hex, 0, 1), 2) : 0));
+        $rgb['g'] = hexdec($length == 6 ? substr($hex, 2, 2) : ($length == 3 ? str_repeat(substr($hex, 1, 1), 2) : 0));
+        $rgb['b'] = hexdec($length == 6 ? substr($hex, 4, 2) : ($length == 3 ? str_repeat(substr($hex, 2, 1), 2) : 0));
+        if ( $alpha ) {
+           $rgb['a'] = $alpha;
+        }
+        return implode('-', $rgb);
+     }
 
 
 }
