@@ -88,7 +88,8 @@ class Qr_Module extends Module{
 	{
 		//Affichage du formulaire
         $image_url = ('https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=test&color=' . $this->hexToRgb(strval(Configuration::get('QR_MODULE_COLOR'))));
-        $image = '<div class="col-lg-6"><img src="' . $image_url . '" class="img-thumbnail" width="400"></div>';
+        $image = '<div class="col-lg-6"><img src="' . $image_url . '" class="img-thumbnail" width="200"></div>';
+        $numberInput = '<div class="col-lg-6"><input type="number" name="NumberInput"></div>';
 
 		$form = array(
 			'form' => array(
@@ -96,6 +97,26 @@ class Qr_Module extends Module{
 					'title' => $this->l('Settings'),
 				),
 				'input' => array(
+                    array(
+                        'type' => 'radio',
+                        'label' => $this->l('Status'),
+                        'name' => 'state',
+                        'class' => 't',
+                        'required'  => true,
+                        'is_bool' => true, 
+                        'values' => array(
+                            array(
+                                'id' => 'enabled',
+                                'value' => 0,
+                                'label' => $this->l('activé')
+                            ),
+                            array(
+                                'id' => 'disabled',
+                                'value' => 1,
+                                'label' => $this->l('désactivé')
+                            )
+                        )
+                    ),
 					array(
 						'type' => 'text',
 						'label' => $this->l('Configuration value'),
@@ -109,7 +130,25 @@ class Qr_Module extends Module{
                         'name' => 'QR_MODULE_COLOR'
                     ),
                     array(
-                        'type' => 'file',
+                        'type' => 'html',
+                        'label' => $this->l('Size'),
+                        'name' => 'Dimensions',
+                        'required' => true,
+                        'html_content' => 
+                                        '<div>
+                                            <input placeholder="Hauteur" type="number" name="size">
+                                            <input placeholder="Largeur" type="number" name="height">
+                                        </div>'
+                    ),
+                    array(
+                        'type' => 'html',
+                        'label' => $this->l('Previsualisation'),
+                        'name' => 'Previsualization',
+                        'required' => true,
+                        'html_content' => $image
+                    ),
+                    array(
+                        'type' => 'hidden',
                         'label' => $this->l('Previsualization'),
                         'name' => 'image_url_maker',
                         'image' => $image ,
