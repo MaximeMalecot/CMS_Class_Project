@@ -66,8 +66,10 @@ class Qr_Module extends Module{
 		//Vérifier si le formulaire a été envoyé
 		if (Tools::isSubmit('btnSubmit')) {
 			//récupere la valeur du champ txt
-			$pageName = strval(Tools::getValue('QR_MODULE_NAME'));
-            $color = strval(Tools::getValue('QR_MODULE_COLOR'));
+			$pageName   = strval(Tools::getValue('QR_MODULE_NAME'));
+            $color      = strval(Tools::getValue('QR_MODULE_COLOR'));
+            $size       = intval(Tools::getValue('size'));
+
 			//Vérifie qu'il n'est pas vide
 			if (!$pageName||empty($pageName))
 			{
@@ -76,6 +78,7 @@ class Qr_Module extends Module{
 			} else {
 				Configuration::updateValue('QR_MODULE_NAME', $pageName);
 				Configuration::updateValue('QR_MODULE_COLOR', $color);
+				Configuration::updateValue('QR_MODULE_DIMENSIONS', $size);
 				//notif succes
 				$output = $this->displayConfirmation($this->l('Valeurs mise à jour'));
 			}
@@ -87,7 +90,10 @@ class Qr_Module extends Module{
     public function displayForm() 
 	{
 		//Affichage du formulaire
-        $image_url = ('https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=test&color=' . $this->hexToRgb(strval(Configuration::get('QR_MODULE_COLOR'))));
+        $color = $this->hexToRgb(strval(Configuration::get('QR_MODULE_COLOR')));
+        $size = intval(Configuration::get('QR_MODULE_DIMENSIONS'));
+        $image_url = "https://api.qrserver.com/v1/create-qr-code/?size=${size}x${size}&data=test&color=$color";
+
         $image = '<div class="col-lg-6"><img src="' . $image_url . '" class="img-thumbnail" width="200"></div>';
         $numberInput = '<div class="col-lg-6"><input type="number" name="NumberInput"></div>';
 
@@ -131,13 +137,12 @@ class Qr_Module extends Module{
                     ),
                     array(
                         'type' => 'html',
-                        'label' => $this->l('Size'),
-                        'name' => 'Dimensions',
+                        'label' => $this->l('Taille'),
+                        'name' => 'Taille',
                         'required' => true,
                         'html_content' => 
                                         '<div>
-                                            <input placeholder="Hauteur" type="number" name="size">
-                                            <input placeholder="Largeur" type="number" name="height">
+                                            <input placeholder="Taille" type="number" value="'.$size.'" name="size">
                                         </div>'
                     ),
                     array(
@@ -168,6 +173,8 @@ class Qr_Module extends Module{
 
         $helper->fields_value['QR_MODULE_NAME'] = strval(Configuration::get('QR_MODULE_NAME'));
         $helper->fields_value['QR_MODULE_COLOR'] = strval(Configuration::get('QR_MODULE_COLOR'));
+        $helper->fields_value['height'] = intval(explode('x', Configuration::get('QR_MODULE_DIMENSIONS'))[0]);
+        $helper->fields_value['width'] = intval(explode('x', Configuration::get('QR_MODULE_DIMENSIONS'))[1]);
 		$helper->module = $this;
 		$helper->name_controller = $this->name;
 		$helper->token = Tools::getAdminTokenLite('AdminModules');
