@@ -69,13 +69,15 @@ class Qr_Module extends Module{
 			$pageName   = strval(Tools::getValue('QR_MODULE_NAME'));
             $color      = strval(Tools::getValue('QR_MODULE_COLOR'));
             $size       = intval(Tools::getValue('size'));
+            $state      = intval(Tools::getValue('state'));
 
-			//Vérifie qu'il n'est pas vide
+            //Vérifie qu'il n'est pas vide
 			if (!$pageName||empty($pageName))
 			{
 				//Si oui, affiche une erreur
 				$output = $this->displayError($this->l('Valeur invalide'));
 			} else {
+                Configuration::updateValue('QR_MODULE_STATE', ($state == 1));
 				Configuration::updateValue('QR_MODULE_NAME', $pageName);
 				Configuration::updateValue('QR_MODULE_COLOR', $color);
 				Configuration::updateValue('QR_MODULE_DIMENSIONS', $size);
@@ -109,18 +111,19 @@ class Qr_Module extends Module{
                         'name' => 'state',
                         'class' => 't',
                         'required'  => true,
-                        'is_bool' => true, 
+                        'is_bool' => true,
                         'values' => array(
                             array(
-                                'id' => 'enabled',
+                                'id' => 'disabled',
                                 'value' => 0,
-                                'label' => $this->l('activé')
+                                'label' => $this->l('désactivé')
                             ),
                             array(
-                                'id' => 'disabled',
+                                'id' => 'enabled',
                                 'value' => 1,
-                                'label' => $this->l('désactivé')
-                            )
+                                'label' => $this->l('activé'),
+                                'checked' => true,
+                            ),
                         )
                     ),
 					array(
@@ -152,15 +155,6 @@ class Qr_Module extends Module{
                         'required' => true,
                         'html_content' => $image
                     ),
-                    array(
-                        'type' => 'hidden',
-                        'label' => $this->l('Previsualization'),
-                        'name' => 'image_url_maker',
-                        'image' => $image ,
-                        'readonly' => true,
-                        'disabled' => true,
-                    ),
-                    
 				),
 				'submit' => array(
 					'title' => $this->l('Save'),
@@ -171,11 +165,11 @@ class Qr_Module extends Module{
 
 		$helper = new HelperForm();
 
-        $helper->fields_value['QR_MODULE_NAME'] = strval(Configuration::get('QR_MODULE_NAME'));
+        $helper->fields_value['state']           = Configuration::get('QR_MODULE_STATE');
+        $helper->fields_value['QR_MODULE_NAME']  = strval(Configuration::get('QR_MODULE_NAME'));
         $helper->fields_value['QR_MODULE_COLOR'] = strval(Configuration::get('QR_MODULE_COLOR'));
-        $helper->fields_value['height'] = intval(explode('x', Configuration::get('QR_MODULE_DIMENSIONS'))[0]);
-        $helper->fields_value['width'] = intval(explode('x', Configuration::get('QR_MODULE_DIMENSIONS'))[1]);
-		$helper->module = $this;
+
+        $helper->module = $this;
 		$helper->name_controller = $this->name;
 		$helper->token = Tools::getAdminTokenLite('AdminModules');
 		$helper->currentIndex = AdminController::$currentIndex.'&configure='.$this->name;
@@ -183,9 +177,6 @@ class Qr_Module extends Module{
         //Langue
 		//$defaultLang = (int)Configuration::get('PS_LANG_DEFAULT');
 		//$helper->default_form_language = $defaultLang;
-
-		//charge la valeur de AG_MODULE_NAME
-		$helper->fields_value['AG_MODULE_NAME'] = Configuration::get('AG_MODULE_NAME');
 
 		return $helper->generateForm(array($form));
 	}
