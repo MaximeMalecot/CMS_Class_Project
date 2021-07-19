@@ -87,8 +87,8 @@ class Qr_Module extends Module{
     public function displayForm() 
 	{
 		//Affichage du formulaire
-        $image = ('https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=test&color=' . $this->hexToRgb(strval(Configuration::get('QR_MODULE_COLOR'))));
-        $image_url = ImageManager::thumbnail($image,'test.png', 350, 'png', true, true);
+        $image_url = ('https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=test&color=' . $this->hexToRgb(strval(Configuration::get('QR_MODULE_COLOR'))));
+        $image = '<div class="col-lg-6"><img src="' . $image_url . '" class="img-thumbnail" width="400"></div>';
 
 		$form = array(
 			'form' => array(
@@ -111,13 +111,10 @@ class Qr_Module extends Module{
                     array(
                         'type' => 'file',
                         'label' => $this->l('Previsualization'),
-                        'disabled' => true,
                         'name' => 'image_url_maker',
-                        'image' => $image_url ,
-                        'size' => 350,
-                        'display_image' => true,
-                        'col' => 6,
-                        'hint' => $this->l('Upload a maker image from your computer.')
+                        'image' => $image ,
+                        'readonly' => true,
+                        'disabled' => true,
                     ),
                     
 				),
@@ -136,8 +133,8 @@ class Qr_Module extends Module{
 		$helper->name_controller = $this->name;
 		$helper->token = Tools::getAdminTokenLite('AdminModules');
 		$helper->currentIndex = AdminController::$currentIndex.'&configure='.$this->name;
-        echo "<img src='$image'>";
-		//Langue
+
+        //Langue
 		//$defaultLang = (int)Configuration::get('PS_LANG_DEFAULT');
 		//$helper->default_form_language = $defaultLang;
 
