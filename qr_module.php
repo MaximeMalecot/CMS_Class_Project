@@ -99,6 +99,32 @@ class Qr_Module extends Module{
         $image = '<div class="col-lg-6"><img src="' . $image_url . '" class="img-thumbnail" width="200"></div>';
         $numberInput = '<div class="col-lg-6"><input type="number" name="NumberInput"></div>';
 
+        $id_lang=(int)Context::getContext()->language->id;
+        $start=0;
+        $limit=100;
+        $order_by='id_product';
+        $order_way='DESC';
+        $id_category = false; 
+        $only_active =true;
+        $context = null;
+
+        $all_products=Product::getProducts($id_lang, $start, $limit, $order_by, $order_way, $id_category,
+                $only_active ,  $context);
+
+        foreach($all_products as $product){
+            $categories_id[] = $product['id_category_default'];
+        }
+
+        $categories_id = array_unique($categories_id);
+
+        $checkbox = '<div class="col-lg-6"><ul>';
+
+        foreach($categories_id as $category){
+            $checkbox .= '<li><input type="checkbox" value="'.$category.'" /><label>'.$this->getCategoryName($category).'</label></li>';
+        }
+
+        $checkbox .= '</ul></div>';
+
 		$form = array(
 			'form' => array(
 				'legend' => array(
@@ -155,6 +181,13 @@ class Qr_Module extends Module{
                         'required' => true,
                         'html_content' => $image
                     ),
+                    array(
+                        'type' => 'html',
+                        'lang' => true,
+                        'label' => $this->l('Category'),
+                        'name' => 'Categories',
+                        'html_content' => $checkbox
+                    )
 				),
 				'submit' => array(
 					'title' => $this->l('Save'),
@@ -193,5 +226,12 @@ class Qr_Module extends Module{
         return implode('-', $rgb);
      }
 
+     public static function getCategoryName($id){
+
+        $category = new Category($id,Context::getContext()->language->id);
+        
+        return $category->name;
+        
+    }
 
 }
