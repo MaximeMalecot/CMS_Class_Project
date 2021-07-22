@@ -28,21 +28,26 @@ class Qr_Module extends Module{
     }
 
     private function setConfigurationValues(){
-        if (!Configuration::updateValue('QR_MODULE_COLOR', '0-0-0') || !Configuration::updateValue('QR_MODULE_DIMENSIONS', '100') ){
+        if (!Configuration::updateValue('QR_MODULE_COLOR', '0-0-0') || 
+            !Configuration::updateValue('QR_MODULE_DIMENSIONS', '100') ){
             return false;
         }
         return true;
     }
 
     private function removeConfigurationValues(){
-        if (!Configuration::deleteByName('QR_MODULE_COLOR') || !Configuration::deleteByName('QR_MODULE_DIMENSIONS') ){
+        if (!Configuration::deleteByName('QR_MODULE_COLOR') || 
+            !Configuration::deleteByName('QR_MODULE_DIMENSIONS') ){
             return false;
         }
         return true;
     }
 
     public function install(){
-        if( !parent::install() || !$this->registerHook('leftColumn') || !$this->registerHook('header') || !$this->setConfigurationValues() ){
+        if( !parent::install() || 
+            !$this->registerHook('leftColumn') || 
+            !$this->registerHook('header') || 
+            !$this->setConfigurationValues() ){
             return false;
         }else{
             return true;
@@ -71,7 +76,7 @@ class Qr_Module extends Module{
             $state      = intval(Tools::getValue('state'));
 
             //Vérifie qu'il n'est pas vide
-			if (!$pageName||empty($pageName))
+			if ( empty($color) || empty($size) || empty($state))
 			{
 				//Si oui, affiche une erreur
 				$output = $this->displayError($this->l('Valeur invalide'));
@@ -94,7 +99,7 @@ class Qr_Module extends Module{
         $size = intval(Configuration::get('QR_MODULE_DIMENSIONS'));
         $image_url = "https://api.qrserver.com/v1/create-qr-code/?size=${size}x${size}&data=test&color=$color";
 
-        $image = '<div class="col-lg-6"><img src="' . $image_url . '" class="img-thumbnail" width="200"></div>';
+        $image       = '<div class="col-lg-6"><img src="' . $image_url . '" class="img-thumbnail" width="200"></div>';
         $numberInput = '<div class="col-lg-6"><input type="number" name="NumberInput"></div>';
 
         $id_lang=(int)Context::getContext()->language->id;
@@ -190,7 +195,6 @@ class Qr_Module extends Module{
 		$helper = new HelperForm();
 
         $helper->fields_value['state']           = Configuration::get('QR_MODULE_STATE');
-        $helper->fields_value['QR_MODULE_NAME']  = strval(Configuration::get('QR_MODULE_NAME'));
         $helper->fields_value['QR_MODULE_COLOR'] = strval(Configuration::get('QR_MODULE_COLOR'));
 
         $helper->module = $this;
@@ -224,5 +228,27 @@ class Qr_Module extends Module{
         return $category->name;
         
     }
+
+    public function hookDisplayLeftColumn($params) 
+	{
+        $color = $this->hexToRgb(strval(Configuration::get('QR_MODULE_COLOR')));
+        $size = intval(Configuration::get('QR_MODULE_DIMENSIONS'));
+        $image = "https://api.qrserver.com/v1/create-qr-code/?size=${size}x${size}&data=test&color=$color";
+
+		$this->context->smarty->assign([
+			'image' => $image
+		]);
+
+		return $this->display(__FILE__, 'qr_module.tpl');
+	}
+
+	public function hookDisplayHeader() 
+	{
+		$this->context->controller->registerStylesheet(
+			'ag_module',
+			$this->_path.'views/css/ag_module.css',
+			['server' => 'remote', 'position' => 'head', 'priority' => 150]
+		);
+	}
 
 }
