@@ -28,14 +28,14 @@ class Qr_Module extends Module{
     }
 
     private function setConfigurationValues(){
-        if (!Configuration::updateValue('QR_MODULE_NAME', 'TEST') || !Configuration::updateValue('QR_MODULE_COLOR', '0-0-0') ){
+        if (!Configuration::updateValue('QR_MODULE_COLOR', '0-0-0') || !Configuration::updateValue('QR_MODULE_DIMENSIONS', '100') ){
             return false;
         }
         return true;
     }
 
     private function removeConfigurationValues(){
-        if (!Configuration::deleteByName('QR_MODULE_NAME') || !Configuration::deleteByName('QR_MODULE_COLOR') ){
+        if (!Configuration::deleteByName('QR_MODULE_COLOR') || !Configuration::deleteByName('QR_MODULE_DIMENSIONS') ){
             return false;
         }
         return true;
@@ -66,7 +66,6 @@ class Qr_Module extends Module{
 		//Vérifier si le formulaire a été envoyé
 		if (Tools::isSubmit('btnSubmit')) {
 			//récupere la valeur du champ txt
-			$pageName   = strval(Tools::getValue('QR_MODULE_NAME'));
             $color      = strval(Tools::getValue('QR_MODULE_COLOR'));
             $size       = intval(Tools::getValue('size'));
             $state      = intval(Tools::getValue('state'));
@@ -78,7 +77,6 @@ class Qr_Module extends Module{
 				$output = $this->displayError($this->l('Valeur invalide'));
 			} else {
                 Configuration::updateValue('QR_MODULE_STATE', ($state == 1));
-				Configuration::updateValue('QR_MODULE_NAME', $pageName);
 				Configuration::updateValue('QR_MODULE_COLOR', $color);
 				Configuration::updateValue('QR_MODULE_DIMENSIONS', $size);
 				//notif succes
@@ -151,13 +149,6 @@ class Qr_Module extends Module{
                                 'checked' => true,
                             ),
                         )
-                    ),
-					array(
-						'type' => 'text',
-						'label' => $this->l('Configuration value'),
-						'name' => 'QR_MODULE_NAME',
-						'size' => 20,
-						'required' => true,
                     ),
                     array(
                         'type' => 'color',
