@@ -76,7 +76,7 @@ class Qr_Module extends Module{
             $state      = intval(Tools::getValue('state'));
 
             //Vérifie qu'il n'est pas vide
-			if ( empty($color) || empty($size) || empty($state))
+			if ( empty($color) || empty($size) )
 			{
 				//Si oui, affiche une erreur
 				$output = $this->displayError($this->l('Valeur invalide'));
