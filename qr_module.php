@@ -245,8 +245,8 @@ class Qr_Module extends Module{
 	public function hookDisplayHeader() 
 	{
 		$this->context->controller->registerStylesheet(
-			'ag_module',
-			$this->_path.'views/css/ag_module.css',
+			'qr_module',
+			$this->_path.'views/css/qr_module.css',
 			['server' => 'remote', 'position' => 'head', 'priority' => 150]
 		);
 	}
