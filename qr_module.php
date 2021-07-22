@@ -45,6 +45,8 @@ class Qr_Module extends Module{
 
     public function install(){
         if( !parent::install() || 
+            !$this->registerHook('leftColumnProduct') || 
+            !$this->registerHook('displayProductAction') || 
             !$this->registerHook('leftColumn') || 
             !$this->registerHook('header') || 
             !$this->setConfigurationValues() ){
@@ -230,6 +232,32 @@ class Qr_Module extends Module{
     }
 
     public function hookDisplayLeftColumn($params) 
+	{
+        $color = $this->hexToRgb(strval(Configuration::get('QR_MODULE_COLOR')));
+        $size = intval(Configuration::get('QR_MODULE_DIMENSIONS'));
+        $image = "https://api.qrserver.com/v1/create-qr-code/?size=${size}x${size}&data=test&color=$color";
+
+		$this->context->smarty->assign([
+			'image' => $image
+		]);
+
+		return $this->display(__FILE__, 'qr_module.tpl');
+	}
+
+    public function hookDisplayLeftColumnProduct($params) 
+	{
+        $color = $this->hexToRgb(strval(Configuration::get('QR_MODULE_COLOR')));
+        $size = intval(Configuration::get('QR_MODULE_DIMENSIONS'));
+        $image = "https://api.qrserver.com/v1/create-qr-code/?size=${size}x${size}&data=test&color=$color";
+
+		$this->context->smarty->assign([
+			'image' => $image
+		]);
+
+		return $this->display(__FILE__, 'qr_module.tpl');
+	}
+
+    public function hookDisplayProductAction($params) 
 	{
         $color = $this->hexToRgb(strval(Configuration::get('QR_MODULE_COLOR')));
         $size = intval(Configuration::get('QR_MODULE_DIMENSIONS'));
