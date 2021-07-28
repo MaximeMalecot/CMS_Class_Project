@@ -75,7 +75,11 @@ class Qr_Module extends Module{
 			//récupere la valeur du champ txt
             $color      = strval(Tools::getValue('QR_MODULE_COLOR'));
             $size       = intval(Tools::getValue('size'));
+            $size       = $size > 500 ? 500 : $size;
+            $size       = $size < 10 ? 10 : $size;
+
             $state      = intval(Tools::getValue('state'));
+            $categories = intval(Tools::getValue('categories'));
 
             //Vérifie qu'il n'est pas vide
 			if ( empty($color) || empty($size) )
@@ -86,7 +90,9 @@ class Qr_Module extends Module{
                 Configuration::updateValue('QR_MODULE_STATE', ($state == 1));
 				Configuration::updateValue('QR_MODULE_COLOR', $color);
 				Configuration::updateValue('QR_MODULE_DIMENSIONS', $size);
-				//notif succes
+                //Configuration::updateValue('QR_MODULE_DISPLAY_IN', $size);
+
+				//notif success
 				$output = $this->displayConfirmation($this->l('Valeurs mise à jour'));
 			}
 		}
@@ -183,7 +189,7 @@ class Qr_Module extends Module{
                         'type' => 'html',
                         'lang' => true,
                         'label' => $this->l('Category'),
-                        'name' => 'Categories',
+                        'name' => 'categories',
                         'html_content' => $checkbox
                     )
 				),
@@ -248,6 +254,8 @@ class Qr_Module extends Module{
         $product = new Product((int)Tools::getValue('id_product'));
         $link    = new Link();
         $url     = $link->getProductLink($product);
+
+        $category = $product->id_category_default;
 
         $image = $this->getQRLink($url);
 
