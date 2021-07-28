@@ -45,10 +45,7 @@ class Qr_Module extends Module{
 
     public function install(){
         if( !parent::install() || 
-            !$this->registerHook('displayLeftColumnProduct') || 
             !$this->registerHook('displayProductAdditionalInfo') || 
-            !$this->registerHook('leftColumn') || 
-            !$this->registerHook('header') || 
             !$this->setConfigurationValues() ){
             return false;
         }else{
@@ -73,15 +70,22 @@ class Qr_Module extends Module{
 		//Vérifier si le formulaire a été envoyé
 		if (Tools::isSubmit('btnSubmit')) {
 			//récupere la valeur du champ txt
-            $color      = strval(Tools::getValue('QR_MODULE_COLOR'));
-            $size       = intval(Tools::getValue('size'));
+            $size       = intval(Tools::getValue('QR_MODULE_SIZE'));
             $size       = $size > 500 ? 500 : $size;
             $size       = $size < 10 ? 10 : $size;
 
-            $state      = intval(Tools::getValue('state'));
-            $categories = intval(Tools::getValue('categories'));
+            $color      = strval(Tools::getValue('QR_MODULE_COLOR'));
+            $state      = intval(Tools::getValue('QR_MODULE_STATE'));
 
-            //Vérifie qu'il n'est pas vide
+            $all_categories = $this->getCategories();
+            $selected_categories = [];
+
+            foreach ($all_categories as $chbx_options){
+                if (Tools::getValue('QR_MODULE_DISPLAY_IN_'.(int)$chbx_options['id'])){
+                    $selected_categories[] = $chbx_options['id'];
+                }
+            }
+
 			if ( empty($color) || empty($size) )
 			{
 				//Si oui, affiche une erreur
@@ -90,15 +94,43 @@ class Qr_Module extends Module{
                 Configuration::updateValue('QR_MODULE_STATE', ($state == 1));
 				Configuration::updateValue('QR_MODULE_COLOR', $color);
 				Configuration::updateValue('QR_MODULE_DIMENSIONS', $size);
-                //Configuration::updateValue('QR_MODULE_DISPLAY_IN', $size);
 
 				//notif success
 				$output = $this->displayConfirmation($this->l('Valeurs mise à jour'));
 			}
+
+            if( count($selected_categories) < 1){
+                Configuration::updateValue('QR_MODULE_DISPLAY_IN', null);
+            }else{
+                Configuration::updateValue('QR_MODULE_DISPLAY_IN', serialize($selected_categories));
+            }
+            
 		}
 
 		return $output.$this->displayForm();
 	}
+
+    private function getCategories(){
+        $id_lang=(int)Context::getContext()->language->id;
+        $start=0;
+        $limit=100;
+        $order_by='id_product';
+        $order_way='DESC';
+        $id_category = false; 
+        $only_active =true;
+        $context = null;
+
+        $categories = [];
+        $all_categories=Category::getCategories($id_lang, true, false);
+        foreach($all_categories as $category){
+            $categories[] = array(
+                'id' => $category['id_category'], 
+                'name' => $category['name'], 
+                'val' => $category['id_category_default']
+            );
+        }
+        return $categories;
+    }
 
     public function displayForm() 
 	{
@@ -110,32 +142,6 @@ class Qr_Module extends Module{
         $image       = '<div class="col-lg-6"><img src="' . $image_url . '" class="img-thumbnail" width="200"></div>';
         $numberInput = '<div class="col-lg-6"><input type="number" name="NumberInput"></div>';
 
-        $id_lang=(int)Context::getContext()->language->id;
-        $start=0;
-        $limit=100;
-        $order_by='id_product';
-        $order_way='DESC';
-        $id_category = false; 
-        $only_active =true;
-        $context = null;
-
-        $all_products=Product::getProducts($id_lang, $start, $limit, $order_by, $order_way, $id_category,
-                $only_active ,  $context);
-
-        foreach($all_products as $product){
-            $categories_id[] = $product['id_category_default'];
-        }
-
-        $categories_id = array_unique($categories_id);
-
-        $checkbox = '<div class="col-lg-6"><ul>';
-
-        foreach($categories_id as $category){
-            $checkbox .= '<li><input type="checkbox" value="'.$category.'" /><label>'.$this->getCategoryName($category).'</label></li>';
-        }
-
-        $checkbox .= '</ul></div>';
-
 		$form = array(
 			'form' => array(
 				'legend' => array(
@@ -145,7 +151,7 @@ class Qr_Module extends Module{
                     array(
                         'type' => 'radio',
                         'label' => $this->l('Status'),
-                        'name' => 'state',
+                        'name' => 'QR_MODULE_STATE',
                         'class' => 't',
                         'required'  => true,
                         'is_bool' => true,
@@ -171,11 +177,11 @@ class Qr_Module extends Module{
                     array(
                         'type' => 'html',
                         'label' => $this->l('Taille'),
-                        'name' => 'Taille',
+                        'name' => 'QR_MODULE_SIZE',
                         'required' => true,
                         'html_content' => 
                                         '<div>
-                                            <input placeholder="Taille" type="number" value="'.$size.'" name="size">
+                                            <input placeholder="Taille" type="number" value="'.$size.'" name="QR_MODULE_SIZE">
                                         </div>'
                     ),
                     array(
@@ -186,12 +192,17 @@ class Qr_Module extends Module{
                         'html_content' => $image
                     ),
                     array(
-                        'type' => 'html',
-                        'lang' => true,
+                        'type' => 'checkbox',
                         'label' => $this->l('Category'),
-                        'name' => 'categories',
-                        'html_content' => $checkbox
-                    )
+                        'name' => 'QR_MODULE_DISPLAY_IN',
+                        'multiple' => true,
+                        'values' => array(
+                            'query' => $this->getCategories(),
+                            'id' => 'id',
+                            'name' => 'name',
+                            'value' => '1'
+                        ),
+                    ),
 				),
 				'submit' => array(
 					'title' => $this->l('Save'),
@@ -202,7 +213,7 @@ class Qr_Module extends Module{
 
 		$helper = new HelperForm();
 
-        $helper->fields_value['state']           = Configuration::get('QR_MODULE_STATE');
+        $helper->fields_value['QR_MODULE_STATE']           = Configuration::get('QR_MODULE_STATE');
         $helper->fields_value['QR_MODULE_COLOR'] = strval(Configuration::get('QR_MODULE_COLOR'));
 
         $helper->module = $this;
