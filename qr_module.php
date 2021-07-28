@@ -45,8 +45,8 @@ class Qr_Module extends Module{
 
     public function install(){
         if( !parent::install() || 
-            !$this->registerHook('leftColumnProduct') || 
-            !$this->registerHook('displayProductAction') || 
+            !$this->registerHook('displayLeftColumnProduct') || 
+            !$this->registerHook('displayProductAdditionalInfo') || 
             !$this->registerHook('leftColumn') || 
             !$this->registerHook('header') || 
             !$this->setConfigurationValues() ){
@@ -257,7 +257,7 @@ class Qr_Module extends Module{
 		return $this->display(__FILE__, 'qr_module.tpl');
 	}
 
-    public function hookDisplayProductAction($params) 
+    public function hookDisplayProductAdditionalInfo($params) 
 	{
         $color = $this->hexToRgb(strval(Configuration::get('QR_MODULE_COLOR')));
         $size = intval(Configuration::get('QR_MODULE_DIMENSIONS'));
