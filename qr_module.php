@@ -104,7 +104,7 @@ class Qr_Module extends Module{
             }else{
                 Configuration::updateValue('QR_MODULE_DISPLAY_IN', serialize($selected_categories));
             }
-            
+
 		}
 
 		return $output.$this->displayForm();
@@ -258,7 +258,7 @@ class Qr_Module extends Module{
 
     public function hookDisplayProductAdditionalInfo($params) //Quick resume of product
 	{
-
+        if(! Configuration::get('QR_MODULE_STATE') ) return;
         $page_name = Dispatcher::getInstance()->getController(); // page_name var doesn't work without without this
         if ($page_name != 'product') return;
         
