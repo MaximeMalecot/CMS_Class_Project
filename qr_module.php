@@ -267,7 +267,10 @@ class Qr_Module extends Module{
         $url     = $link->getProductLink($product);
 
         $category = $product->id_category_default;
-
+        $selected_categories = Configuration::get('QR_MODULE_DISPLAY_IN');
+        if(!$selected_categories) return;
+        $selected_categories = unserialize($selected_categories);
+        if( !in_array($category, $selected_categories) ) return;
         $image = $this->getQRLink($url);
 
 		$this->context->smarty->assign([
