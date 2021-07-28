@@ -231,52 +231,31 @@ class Qr_Module extends Module{
         
     }
 
-    public function hookDisplayLeftColumn($params) 
-	{
+    private function getQRLink($data = "empty"){
         $color = $this->hexToRgb(strval(Configuration::get('QR_MODULE_COLOR')));
         $size = intval(Configuration::get('QR_MODULE_DIMENSIONS'));
-        $image = "https://api.qrserver.com/v1/create-qr-code/?size=${size}x${size}&data=test&color=$color";
+        $image = "https://api.qrserver.com/v1/create-qr-code/?size=${size}x${size}&data=$data&color=$color";
+        return $image;
+    }
+
+
+    public function hookDisplayProductAdditionalInfo($params) //Quick resume of product
+	{
+
+        $page_name = Dispatcher::getInstance()->getController(); // page_name var doesn't work without without this
+        if ($page_name != 'product') return;
+        
+        $product = new Product((int)Tools::getValue('id_product'));
+        $link    = new Link();
+        $url     = $link->getProductLink($product);
+
+        $image = $this->getQRLink($url);
 
 		$this->context->smarty->assign([
 			'image' => $image
 		]);
 
 		return $this->display(__FILE__, 'qr_module.tpl');
-	}
-
-    public function hookDisplayLeftColumnProduct($params) 
-	{
-        $color = $this->hexToRgb(strval(Configuration::get('QR_MODULE_COLOR')));
-        $size = intval(Configuration::get('QR_MODULE_DIMENSIONS'));
-        $image = "https://api.qrserver.com/v1/create-qr-code/?size=${size}x${size}&data=test&color=$color";
-
-		$this->context->smarty->assign([
-			'image' => $image
-		]);
-
-		return $this->display(__FILE__, 'qr_module.tpl');
-	}
-
-    public function hookDisplayProductAdditionalInfo($params) 
-	{
-        $color = $this->hexToRgb(strval(Configuration::get('QR_MODULE_COLOR')));
-        $size = intval(Configuration::get('QR_MODULE_DIMENSIONS'));
-        $image = "https://api.qrserver.com/v1/create-qr-code/?size=${size}x${size}&data=test&color=$color";
-
-		$this->context->smarty->assign([
-			'image' => $image
-		]);
-
-		return $this->display(__FILE__, 'qr_module.tpl');
-	}
-
-	public function hookDisplayHeader() 
-	{
-		$this->context->controller->registerStylesheet(
-			'qr_module',
-			$this->_path.'views/css/qr_module.css',
-			['server' => 'remote', 'position' => 'head', 'priority' => 150]
-		);
 	}
 
 }
