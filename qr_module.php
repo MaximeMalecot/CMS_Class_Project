@@ -112,13 +112,9 @@ class Qr_Module extends Module{
 
     private function getCategories($checked = false){
         $id_lang=(int)Context::getContext()->language->id;
-        $start=0;
-        $limit=100;
-        $order_by='id_product';
-        $order_way='DESC';
         $id_category = false; 
-        $only_active =true;
         $context = null;
+
         if($checked){
             $selected_categories = Configuration::get('QR_MODULE_DISPLAY_IN');
             if($selected_categories ) {
@@ -135,13 +131,12 @@ class Qr_Module extends Module{
                 'checked' => false
             );
 
-            if($checked && $selected_categories && ( ($category['id_category'] == $selected_categories) || in_array($category['id_category'], $selected_categories) ) ){
+            if($checked && $selected_categories && in_array($category['id_category'], $selected_categories) ){
                 $cat['checked'] = true;
             }
 
             $categories[] = $cat;
         }
-        //var_dump($categories);
         return $categories;
     }
 
@@ -232,20 +227,11 @@ class Qr_Module extends Module{
 
         $helper->fields_value['QR_MODULE_STATE']        = Configuration::get('QR_MODULE_STATE');
         $helper->fields_value['QR_MODULE_COLOR']        = strval(Configuration::get('QR_MODULE_COLOR'));
-        /*$currCategories = Configuration::get('QR_MODULE_DISPLAY_IN');
-        if($currCategories){
-            $helper->fields_value['QR_MODULE_DISPLAY_IN'] = $currCategories;
-
-        }*/
 
         $helper->module = $this;
 		$helper->name_controller = $this->name;
 		$helper->token = Tools::getAdminTokenLite('AdminModules');
 		$helper->currentIndex = AdminController::$currentIndex.'&configure='.$this->name;
-
-        //Langue
-		//$defaultLang = (int)Configuration::get('PS_LANG_DEFAULT');
-		//$helper->default_form_language = $defaultLang;
 
 		return $helper->generateForm(array($form));
 	}
